@@ -1,1 +1,3 @@
 venv
+rs/target/
+rs/Cargo.lock
