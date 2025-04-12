@@ -219,9 +219,16 @@ def add_lighting_events(beatmap: Dict[str, Any]) -> Dict[str, Any]:
 def main():
     parser = argparse.ArgumentParser(description='Add automatic lighting to Beat Saber beatmaps')
     parser.add_argument('-i', '--input', required=True, help='Input beatmap file')
-    parser.add_argument('-o', '--output', required=True, help='Output beatmap file')
+    parser.add_argument('-o', '--output', help='Output beatmap file')
+    parser.add_argument('-r', '--replace', action='store_true', help='Overwrite the input file with the new beatmap')
     parser.add_argument('-f', '--force', action='store_true', help='Force overwrite existing lighting events')
     args = parser.parse_args()
+
+    # Ensure either --output or --replace is used, but not both
+    if not args.output and not args.replace:
+        parser.error("Either --output or --replace must be specified")
+    if args.output and args.replace:
+        parser.error("--output and --replace cannot be used together")
 
     try:
         # Read input beatmap
@@ -239,11 +246,17 @@ def main():
         # Add lighting events
         beatmap = add_lighting_events(beatmap)
 
+        # Determine output file path
+        output_path = args.output if args.output else args.input
+
         # Write output beatmap
-        with open(args.output, 'w') as f:
+        with open(output_path, 'w') as f:
             json.dump(beatmap, f)
 
-        print(f"Successfully added lighting to {args.input} and saved to {args.output}")
+        if args.replace:
+            print(f"Successfully added lighting to {args.input} and replaced the original file")
+        else:
+            print(f"Successfully added lighting to {args.input} and saved to {args.output}")
 
     except Exception as e:
         print(f"Error: {str(e)}")
