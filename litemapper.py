@@ -220,6 +220,7 @@ def main():
     parser = argparse.ArgumentParser(description='Add automatic lighting to Beat Saber beatmaps')
     parser.add_argument('-i', '--input', required=True, help='Input beatmap file')
     parser.add_argument('-o', '--output', required=True, help='Output beatmap file')
+    parser.add_argument('-f', '--force', action='store_true', help='Force overwrite existing lighting events')
     args = parser.parse_args()
 
     try:
@@ -232,6 +233,8 @@ def main():
             raise ValueError("Invalid beatmap version! V3 mapping is not supported yet!")
         if "_notes" not in beatmap:
             raise ValueError("Not a valid beatmap!")
+        if "_events" in beatmap and beatmap["_events"] and len(beatmap["_events"]) > 0 and not args.force:
+            raise ValueError("Beatmap already contains lighting events! Use --force to overwrite.")
 
         # Add lighting events
         beatmap = add_lighting_events(beatmap)
@@ -247,4 +250,4 @@ def main():
         exit(1)
 
 if __name__ == "__main__":
-    main() 
+    main()
