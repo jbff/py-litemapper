@@ -20,4 +20,9 @@ I would like to add a command line option --force that will drop old _events alr
 * With the following additional prompt:
 It isn't enough to test if _events exists, but test to see if it is empty; if it does not exist or it exists but is empty, then it has no lighting; if it exists and is not empty, it has lighting, and --force is required to run the autolighting.
 
+* After some testing, I gave the Warp shell this prompt:
+compare the logic in litemapper.py to the logic in public/js/index.js and ensure the python version is a precise replica of the javascript logic. the output from the python version and the javascript version are very similar but not the same, so I just want to check to see if there is any place in the python script that might be doing something slightly different from the javascript version.
+
+* And it found and corrected several issues autonomously after creating a plan with o1.
+
 The result of this process is the litemapper.py you find here. Now there is a simple command line version of litemapper that is much easier to use to batch process files than the javascript web app.

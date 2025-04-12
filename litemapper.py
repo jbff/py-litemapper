@@ -2,6 +2,7 @@
 
 import json
 import argparse
+import math
 from typing import Dict, List, Any
 
 class Note:
@@ -10,7 +11,7 @@ class Note:
         self.padding = (next_note["_time"] if next_note else note["_time"] + 1) - note["_time"]
 
 def calculate_laser_speed(padding: float) -> int:
-    return int((int((2 / padding) + 1) ** 2) / 4)
+    return math.ceil((math.ceil((2 / padding) + 1) ** 2) / 4)
 
 def add_lighting_events(beatmap: Dict[str, Any]) -> Dict[str, Any]:
     last_padding = 0
@@ -192,13 +193,15 @@ def add_lighting_events(beatmap: Dict[str, Any]) -> Dict[str, Any]:
 
         # Safely parse the current timestamp
         try:
-            current_timestamp = int(float(pace_changes[i][1:]))
-            next_timestamp = int(float(pace_changes[i+1][1:]))
+            current_timestamp = math.ceil(float(pace_changes[i][1:]))
+            next_timestamp = math.ceil(float(pace_changes[i+1][1:]))
         except (ValueError, IndexError) as e:
             continue  # Skip this pace change if there's an error parsing timestamps
-        if current_timestamp != float(pace_changes[i][1:]):
+        # Get the original timestamp as float for precise comparison
+        original_timestamp = float(pace_changes[i][1:])
+        if math.ceil(original_timestamp) != original_timestamp:
             beatmap["_events"].append({
-                "_time": float(pace_changes[i][1:]),
+                "_time": original_timestamp,
                 "_type": 1,
                 "_value": ring_value
             })
@@ -217,7 +220,6 @@ def main():
     parser = argparse.ArgumentParser(description='Add automatic lighting to Beat Saber beatmaps')
     parser.add_argument('-i', '--input', required=True, help='Input beatmap file')
     parser.add_argument('-o', '--output', required=True, help='Output beatmap file')
-    parser.add_argument('-f', '--force', action='store_true', help='Force overwrite existing lighting events')
     args = parser.parse_args()
 
     try:
@@ -230,8 +232,6 @@ def main():
             raise ValueError("Invalid beatmap version! V3 mapping is not supported yet!")
         if "_notes" not in beatmap:
             raise ValueError("Not a valid beatmap!")
-        if "_events" in beatmap and beatmap["_events"] and len(beatmap["_events"]) > 0 and not args.force:
-            raise ValueError("Beatmap already contains lighting events! Use --force to overwrite.")
 
         # Add lighting events
         beatmap = add_lighting_events(beatmap)
